@@ -1,0 +1,25 @@
+<package>
+  <description brief="base_local_planner_3d">
+
+     base_local_planner_3d
+
+  </description>
+  <author>fmder1</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/base_local_planner_3d</url>
+  <depend package="base_local_planner"/>
+  <depend package="roscpp"/>
+  <depend package="nav_core"/>
+  <depend package="hector_uav_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="pluginlib"/>
+
+  <export>
+    <nav_core plugin="${prefix}/blp3d_plugin.xml" />
+  </export>
+
+</package>
+
+

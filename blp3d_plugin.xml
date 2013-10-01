@@ -1,0 +1,7 @@
+<library path="lib/libbase_local_planner_3d">
+    <class name="base_local_planner_3d/TrajectoryPlanner3dROS" type="base_local_planner_3d::TrajectoryPlanner3dROS" base_class_type="nav_core::BaseLocalPlanner">
+    <description>
+      Adds a displacement in the z-axis to the original algorithm.
+    </description>
+  </class>
+</library>
