@@ -1,6 +1,7 @@
 
 #include <hector_uav_msgs/Altimeter.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Range.h>
 #include <base_local_planner/trajectory_planner_ros.h>
 
 #ifndef __Trajectory_Planner_3d_ROS__
@@ -48,13 +49,25 @@ namespace base_local_planner_3d {
 
   protected:
 
+    void sonarCB(const sensor_msgs::Range::ConstPtr& sonar, int direction);
     void altimeterCB(const hector_uav_msgs::Altimeter::ConstPtr& altimeter);
     void navCB(const nav_msgs::Odometry::ConstPtr& odom);
 
     ros::Subscriber alt_sub_;
+    ros::Subscriber up_sonar_sub_;
+    ros::Subscriber down_sonar_sub_;
+
+    double sonar_max_range_;
+
+    double free_space_up_;
+    double free_space_down_;
+
+    double up_safe_dist_;
+    double down_safe_dist_;
 
     double desired_altitude_;
     double current_altitude_;
+
     double alt_tol_;
     double acc_lim_z_;
     double min_vel_z_;
