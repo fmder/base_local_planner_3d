@@ -28,8 +28,8 @@ namespace base_local_planner_3d {
 		std::string down_sonar_topic_name;
 		std::string nav_topic_name;
 		private_nh.param("altimeter_topic_name", altimeter_topic_name, std::string("altimeter"));
-		private_nh.param("up_sonar_topic_name", up_sonar_topic_name, std::string("sonar/up"));
-		private_nh.param("down_sonar_topic_name", down_sonar_topic_name, std::string("sonar/down"));
+		private_nh.param("up_sonar_topic_name", up_sonar_topic_name, std::string(""));
+		private_nh.param("down_sonar_topic_name", down_sonar_topic_name, std::string(""));
 		// private_nh.param("nav_topic_name", nav_topic_name, std::string("odom"));
 		private_nh.param("altitude_tolerance", alt_tol_, 0.15);
 		private_nh.param("up_safe_distance", up_safe_dist_, 0.15);
@@ -44,11 +44,19 @@ namespace base_local_planner_3d {
 		alt_sub_ = local_nh.subscribe<hector_uav_msgs::Altimeter>(altimeter_topic_name.c_str(), 1, boost::bind(&TrajectoryPlanner3dROS::altimeterCB, this, _1));
 		ROS_INFO("Local 3d trajectory planner registered to %s.", local_nh.resolveName(altimeter_topic_name).c_str());
 
-		up_sonar_sub_ = local_nh.subscribe<sensor_msgs::Range>(up_sonar_topic_name.c_str(), 1, boost::bind(&TrajectoryPlanner3dROS::sonarCB, this, _1, UP));
-		ROS_INFO("Local 3d trajectory planner registered to %s.", local_nh.resolveName(up_sonar_topic_name).c_str());
+		if(!up_sonar_topic_name.empty()){
+			up_sonar_sub_ = local_nh.subscribe<sensor_msgs::Range>(up_sonar_topic_name.c_str(), 1, boost::bind(&TrajectoryPlanner3dROS::sonarCB, this, _1, UP));
+			ROS_INFO("Local 3d trajectory planner registered to %s.", local_nh.resolveName(up_sonar_topic_name).c_str());
+		}else{
+			free_space_up_ = std::numeric_limits<double>::max();
+		}
 
-		down_sonar_sub_ = local_nh.subscribe<sensor_msgs::Range>(down_sonar_topic_name.c_str(), 1, boost::bind(&TrajectoryPlanner3dROS::sonarCB, this, _1, DOWN));
-		ROS_INFO("Local 3d trajectory planner registered to %s.", local_nh.resolveName(down_sonar_topic_name).c_str());
+		if(!down_sonar_topic_name.empty()){
+			down_sonar_sub_ = local_nh.subscribe<sensor_msgs::Range>(down_sonar_topic_name.c_str(), 1, boost::bind(&TrajectoryPlanner3dROS::sonarCB, this, _1, DOWN));
+			ROS_INFO("Local 3d trajectory planner registered to %s.", local_nh.resolveName(down_sonar_topic_name).c_str());
+		}else{
+			free_space_up_ = std::numeric_limits<double>::max();
+		}
 	}
 
 	void TrajectoryPlanner3dROS::sonarCB(const sensor_msgs::Range::ConstPtr& sonar, int direction){
