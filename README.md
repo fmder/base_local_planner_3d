@@ -7,7 +7,7 @@ groovy (not catkinized yet)
 
 Missing Features
 ----------------
- - Does not take into account any occupancy sensors
  - Integral and Derivative controller untested yet
  - Only works with hector_uav_msgs::Altimeter altitude
+ - Not thread safe (do not use with a multithreaded mose base)
 
