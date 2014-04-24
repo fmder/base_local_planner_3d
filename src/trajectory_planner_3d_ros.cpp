@@ -76,18 +76,36 @@ namespace base_local_planner_3d {
 
 	bool TrajectoryPlanner3dROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		bool state = base_local_planner::TrajectoryPlannerROS::computeVelocityCommands(cmd_vel);
-		double dt = ros::Time::now().toSec() - last_update_time_;
+		double current_time = ros::Time::now().toSec();
+		double dt = current_time - last_update_time_;
+		last_update_time_ = current_time;
 
 		p_ = desired_altitude_ - current_altitude_;
 		p_ = std::min(p_, free_space_up_ - up_safe_dist_);
 		p_ = std::max(p_, -free_space_down_ + down_safe_dist_);
+
+		// ROS_ERROR("dt: %f", dt);
 		
-		i_ += p_ * dt;
-		d_  = p_ / dt;
+		if(dt > 0){
+			i_ += p_ * dt;
+			d_  = p_ / dt;
+		}else{
+			i_ = 0;
+			d_ = 0;
+		}
+		
+		// int sign = 0;
+		// if(cmd_vel.linear.z >= 0)
+		// 	sign = 1;
+		// else if(cmd_vel.linear.z < 0)
+		// 	sign = -1;
 		
 		cmd_vel.linear.z = gain_p_ * p_ + gain_i_ * i_ + gain_d_ * d_;
+		// ROS_ERROR("CMD_VEL Z1: %f", cmd_vel.linear.z);
 		cmd_vel.linear.z = cmd_vel.linear.z <  max_vel_z_ ? cmd_vel.linear.z :  max_vel_z_;
+		// ROS_ERROR("CMD_VEL Z2: %f", cmd_vel.linear.z);
 		cmd_vel.linear.z = cmd_vel.linear.z > -max_vel_z_ ? cmd_vel.linear.z : -max_vel_z_;
+		// ROS_ERROR("CMD_VEL Z3: %f", cmd_vel.linear.z);
 
 		last_altitude_ = current_altitude_;
 		return state;
@@ -98,7 +116,11 @@ namespace base_local_planner_3d {
 		if(!orig_global_plan.empty())
 			desired_altitude_ = orig_global_plan.back().pose.position.z;
 
+		// ROS_ERROR("Desired Altitude: %f", desired_altitude_);
+		// ROS_ERROR("Current Altitude: %f", current_altitude_);
+
 		p_ = i_ = d_ = 0.0;
+		last_update_time_ = ros::Time::now().toSec();
 		
 		return base_local_planner::TrajectoryPlannerROS::setPlan(orig_global_plan);
 	}
